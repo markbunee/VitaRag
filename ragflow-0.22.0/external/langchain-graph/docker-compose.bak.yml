@@ -1,0 +1,23 @@
+version: '3.11'
+networks:
+  kb_network:
+    external: true
+services:
+  api:
+    restart: always
+    image: 192.168.5.144:8117/llm/langchain-graph:0.4.0-dev
+    container_name: lang-graph-api
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      args:
+#        - UPDATE_PACKAGES=true
+#        - UPDATA_SQLite=true
+    ports:
+      - "8116:8116"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - kb_network

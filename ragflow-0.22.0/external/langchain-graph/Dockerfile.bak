@@ -1,0 +1,29 @@
+FROM m.daocloud.io/docker.io/python:3.11.1-slim
+
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak \
+    && echo "deb https://mirrors.aliyun.com/debian/ bookworm main non-free contrib" > /etc/apt/sources.list \
+    && echo "deb-src https://mirrors.aliyun.com/debian/ bookworm main non-free contrib" >> /etc/apt/sources.list \
+    && echo "deb https://mirrors.aliyun.com/debian-security/ bookworm-security main" >> /etc/apt/sources.list \
+    && echo "deb-src https://mirrors.aliyun.com/debian-security/ bookworm-security main" >> /etc/apt/sources.list \
+    && echo "deb https://mirrors.aliyun.com/debian/ bookworm-updates main non-free contrib" >> /etc/apt/sources.list \
+    && echo "deb-src https://mirrors.aliyun.com/debian/ bookworm-updates main non-free contrib" >> /etc/apt/sources.list
+
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        fonts-noto-cjk \
+        fontconfig \
+    && rm -rf /var/lib/apt/lists/*
+RUN fc-cache -fv
+RUN fc-list | grep Noto
+RUN pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --default-timeout 250
+
+COPY . .
+
+WORKDIR /app
+# 启动应用
+CMD gunicorn app:app -w 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8116
