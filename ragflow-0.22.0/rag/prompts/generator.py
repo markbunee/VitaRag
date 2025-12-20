@@ -129,7 +129,7 @@ def kb_prompt(kbinfos, max_tokens, hash_id=False):
         cnt += draw_node("URL", ck['url'])  if "url" in ck else ""
         img_id = get_value(ck, "image_id", "img_id") ### 新增图像12.18
         if img_id:
-            cnt += draw_node("Image", img_id)###
+            cnt += draw_node("Image", f"/v1/document/image/{img_id}")###
         
         for k, v in docs.get(get_value(ck, "doc_id", "document_id"), {}).items():
             cnt += draw_node(k, v)

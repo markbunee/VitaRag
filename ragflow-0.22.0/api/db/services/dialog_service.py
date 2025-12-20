@@ -499,7 +499,7 @@ def chat(dialog, messages, stream=True, **kwargs):
 #######图像返回
     kwargs["knowledge"] = "\n------\n" + "\n\n------\n\n".join(knowledges)
     if any("Image" in k for k in knowledges):
-        kwargs["knowledge"] += "\n\nYou can refer to the images in the context using the format: ![image](<Image ID>). For example: ![image](123abc456)."
+        kwargs["knowledge"] += "\n\nYou can refer to the images in the context using the format: ![image](<Image URL>)."
     gen_conf = dialog.llm_setting
 
 ###########

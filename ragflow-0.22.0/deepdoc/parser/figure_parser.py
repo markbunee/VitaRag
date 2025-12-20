@@ -7,7 +7,10 @@ from api.db.services.llm_service import LLMBundle
 from common.connection_utils import timeout
 from rag.app.picture import vision_llm_chunk as picture_vision_llm_chunk
 from rag.prompts.generator import vision_llm_figure_describe_prompt
-from rag.app.cell_classifier import cell_classifier
+try:
+    from rag.app.cell_classifier import cell_classifier
+except ImportError:
+    cell_classifier = None
 
 
 # =========================
@@ -156,7 +159,7 @@ class VisionFigureParser:
                     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 )
                 model_path = os.path.join(project_root, "rag", "res", "cell_model.pth")
-                if os.path.exists(model_path):
+                if os.path.exists(model_path) and cell_classifier:
                     cell_classifier.initialize(model_path)
                     VisionFigureParser._classifier = cell_classifier
             except Exception as e:
