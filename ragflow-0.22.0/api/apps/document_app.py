@@ -575,13 +575,35 @@ def change_parser():
 def get_image(image_id):
     try:
         arr = image_id.split("-")
-        if len(arr) != 2:
+        #######
+        if len(arr) < 2:
             return get_data_error_result(message="Image not found.")
-        bkt, nm = image_id.split("-")
+        bkt, nm = image_id.rsplit("-", 1)
+        ###########
+        logging.info(f"Fetching image: bucket={bkt}, name={nm} from image_id={image_id}")
+###############
+        if hasattr(settings.STORAGE_IMPL, 'get_url'):
+            url = settings.STORAGE_IMPL.get_url(bkt, nm)
+            if url:
+                if "minio:9000" in url:
+                    # Replace internal docker hostname with the current request host
+                    # This ensures the URL is accessible from the client's perspective
+                    # If request.host contains a port (e.g. 192.168.1.5:9380), we strip it and append MinIO port
+                    try:
+                        base_host = request.host.split(":")[0]
+                        # Assuming MinIO is mapped to port 9001 on the same host
+                        url = url.replace("minio:9000", f"{base_host}:9001")
+                    except Exception:
+                         # Fallback to localhost if host parsing fails
+                         url = url.replace("minio:9000", "localhost:9001")
+                
+                return flask.redirect(url)
+##################
         response = flask.make_response(settings.STORAGE_IMPL.get(bkt, nm))
         response.headers.set("Content-Type", "image/JPEG")
         return response
     except Exception as e:
+        logging.error(f"Error fetching image {image_id}: {e}")
         return server_error_response(e)
 
 

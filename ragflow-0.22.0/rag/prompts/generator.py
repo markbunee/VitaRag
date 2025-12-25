@@ -127,9 +127,19 @@ def kb_prompt(kbinfos, max_tokens, hash_id=False):
         cnt = "\nID: {}".format(i if not hash_id else hash_str2int(get_value(ck, "id", "chunk_id"), 500))
         cnt += draw_node("Title", get_value(ck, "docnm_kwd", "document_name"))
         cnt += draw_node("URL", ck['url'])  if "url" in ck else ""
+        if "page_num_int" in ck:
+            cnt += draw_node("Page", ck["page_num_int"])
+        if "position_int" in ck:
+            cnt += draw_node("Position", ck["position_int"])
         img_id = get_value(ck, "image_id", "img_id") ### 新增图像12.18
         if img_id:
-            cnt += draw_node("Image", f"/v1/document/image/{img_id}")###
+            from common import settings
+            try:
+                bkt, nm = img_id.rsplit("-", 1)
+                if settings.STORAGE_IMPL.obj_exist(bkt, nm):
+                    cnt += draw_node("Image", f"![](/v1/document/image/{img_id})")###
+            except Exception:
+                pass
         
         for k, v in docs.get(get_value(ck, "doc_id", "document_id"), {}).items():
             cnt += draw_node(k, v)

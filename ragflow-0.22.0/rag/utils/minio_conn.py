@@ -16,6 +16,7 @@
 
 import logging
 import time
+from datetime import timedelta
 from minio import Minio
 from minio.commonconfig import CopySource
 from minio.error import S3Error
@@ -98,16 +99,17 @@ class RAGFlowMinio:
         try:
             if not self.conn.bucket_exists(bucket):
                 return False
-            if self.conn.stat_object(bucket, filename):
-                return True
-            else:
-                return False
-        except S3Error as e:
-            if e.code in ["NoSuchKey", "NoSuchBucket", "ResourceNotFound"]:
-                return False
+            self.conn.stat_object(bucket, filename)
+            return True
         except Exception:
-            logging.exception(f"obj_exist {bucket}/{filename} got exception")
             return False
+
+    def get_url(self, bucket, filename, expires=3600):
+        try:
+            return self.conn.presigned_get_object(bucket, filename, expires=timedelta(seconds=expires))
+        except Exception as e:
+            logging.exception(f"Fail to generate presigned url for {bucket}/{filename}: {e}")
+            return None
 
     def bucket_exists(self, bucket):
         try:

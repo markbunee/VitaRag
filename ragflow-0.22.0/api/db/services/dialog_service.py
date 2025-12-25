@@ -499,7 +499,11 @@ def chat(dialog, messages, stream=True, **kwargs):
 #######图像返回
     kwargs["knowledge"] = "\n------\n" + "\n\n------\n\n".join(knowledges)
     if any("Image" in k for k in knowledges):
-        kwargs["knowledge"] += "\n\nYou can refer to the images in the context using the format: ![image](<Image URL>)."
+        kwargs["knowledge"] += "\n\n**IMPORTANT**: The context contains images in Markdown format (e.g., `![](/v1/document/image/...)`). You MUST include these images in your response exactly as they appear. \n**WARNING**: Do NOT create fake image links (like example.com) or use images not present in the context. Only use the image links provided in the context."
+    else:
+        kwargs["knowledge"] += "\n\n**NOTE**: No images were found in the retrieved context. If the user asks for images, explicitly state that no relevant images were found in the documents."
+    if any("Page" in k for k in knowledges):
+        kwargs["knowledge"] += "\n\n**IMPORTANT**: When the context provides 'Page' information, please explicitly cite the page number in your answer (e.g., '... [Page 5]')."
     gen_conf = dialog.llm_setting
 
 ###########
